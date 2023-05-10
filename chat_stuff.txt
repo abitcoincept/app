@@ -1,0 +1,42 @@
+You are a professional branding agency. For a restaurant called "beers and tacos":
+- Create a slogan
+- Define the color palette of the website including: primary Color, secondary Color, background Color, secondary Background Color, text color and font
+- Create a menu including: names of the dishes and a summary of their ingredients
+ChatGPT
+
+Sure, I'd be happy to help!
+
+Slogan: "Satisfy your cravings with our brews and bites!"
+
+Color Palette:
+
+    Primary color: #FFC107 (a bright, bold yellow)
+    Secondary color: #8BC34A (a fresh, vibrant green)
+    Background color: #FFFFFF (clean, classic white)
+    Secondary background color: #F5F5F5 (a light gray for subtle contrast)
+    Text color: #212121 (a dark gray for readability)
+    Font: Montserrat (a clean, modern sans-serif font)
+
+Menu:
+
+    Classic Beef Tacos: seasoned ground beef, shredded cheese, lettuce, tomato, sour cream, and salsa served in a warm tortilla
+    Grilled Chicken Tacos: marinated grilled chicken, avocado, pico de gallo, and queso fresco served in a warm tortilla
+    Baja Fish Tacos: beer-battered cod, cabbage slaw, chipotle mayo, and lime served in a warm tortilla
+    Veggie Tacos: roasted sweet potato, black beans, corn, avocado, and cilantro served in a warm tortilla
+    Loaded Nachos: crispy tortilla chips topped with seasoned ground beef, queso cheese, jalapeños, tomatoes, black olives, and sour cream
+    Quesadilla: melted cheddar and jack cheese, grilled chicken or steak, sautéed onions and peppers, served with salsa and sour cream
+    Char-Grilled Burger: 1/3 lb beef patty, lettuce, tomato, pickles, and special sauce on a brioche bun
+    Chicken Wings: choice of buffalo, honey BBQ, or garlic parmesan served with celery and ranch or blue cheese dressing
+    Beer-battered Onion Rings: crispy onion rings served with chipotle mayo dipping sauce
+    Fried Avocado Bites: breaded and fried avocado wedges served with ranch dipping sauce
+
+I hope this helps! Let me know if you have any further questions or if you need any revisions.
+
+
+
+[theme]
+primaryColor="#8BC34A"
+backgroundColor="#8BC34A"
+secondaryBackgroundColor="#FFC107"
+textColor="#212121"
+font="Montserrat"
