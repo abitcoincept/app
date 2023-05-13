@@ -41,7 +41,7 @@ tab1, tab2 = st.tabs(["Sugeridor", "Menu Completo"])
 with tab1:
     # App framework
     prompt_is_filled = False
-    st.subheader("🍻 ¡Birras y Tacos! 🌮", anchor=False)
+    st.subheader("🍻 Birras y Tacos 🌮", anchor=False)
 
     ###### Customer Inputs
     col1, col2 = st.columns([3, 1])
@@ -102,7 +102,7 @@ with tab1:
     )
     script_template = PromptTemplate(
         input_variables=["title"],
-        template="Translate the following text to Spanish without adding any extra text :{title}",
+        template="Devuelve el siguiente texto corregido gramaticalmente, excepto que está entre corchetes []: \n{title}",
     )
     director_template = PromptTemplate(
         input_variables=["title", "director"],
@@ -141,12 +141,12 @@ with tab1:
     ###### show stuff if there is a prompt
     if prompt:
         prompt_is_filled = True
-    if search & prompt_is_filled:
+    if prompt_is_filled:
         # title = fake_answer
         print(prompt)
         with get_openai_callback() as cb:
             title = title_chain.run(prompt)
-            # script = script_chain.run(title=title)
+            # title = script_chain.run(title=title)
             print(cb)
 
         ###### Progress bar
