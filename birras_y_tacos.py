@@ -142,12 +142,12 @@ with tab1:
     if prompt:
         prompt_is_filled = True
     if search & prompt_is_filled:
-        title = fake_answer
+        # title = fake_answer
         print(prompt)
-        # with get_openai_callback() as cb:
-        #    title = title_chain.run(prompt)
-        # script = script_chain.run(title=title)
-        #    print(cb)
+        with get_openai_callback() as cb:
+            title = title_chain.run(prompt)
+            # script = script_chain.run(title=title)
+            print(cb)
 
         ###### Progress bar
 
