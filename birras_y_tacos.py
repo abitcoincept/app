@@ -14,7 +14,7 @@ propmpt_template2 = st.secrets["prompt_template2"]
 fake_answer = st.secrets["fake_answer"]
 
 
-use_fake_prompt = True
+use_fake_prompt = False
 
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
