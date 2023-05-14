@@ -10,7 +10,7 @@ propmpt_template2 = st.secrets["prompt_template2"]
 fake_answer = st.secrets["fake_answer"]
 # food_images = st.secrets["food_images"]
 
-use_fake_prompt = False
+use_fake_prompt = True
 
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
@@ -176,7 +176,7 @@ def format_answer(title):
 def update_sidebar():
     add_to_cart_list = []
     remove_from_cart_list = []
-    with st.sidebar:
+    with tab3:
         key = 0
         session_aux = st.session_state
         for items in session_aux:
@@ -184,27 +184,36 @@ def update_sidebar():
                 button_clicked_add = False
                 button_clicked_rem = False
                 if session_aux[items] > 0:
-                    col1, col2 = st.columns([1, 5])
-                    with col2:
-                        button_clicked_add = st.button(
-                            label=items.title()
-                            + " (**"
-                            + str(session_aux[items])
-                            + "**)",
-                            type="secondary",
-                            key=key + 1,
-                        )
-                        if button_clicked_add == True:
-                            add_to_cart_list.append(items)
+                    col1, col2, col3, col4 = st.columns([5, 1, 1, 1])
                     with col1:
-                        button_clicked_rem = st.button(
-                            label="**-**",
+                        st.button(
+                            label=items.title(),
                             type="secondary",
                             key=key,
                         )
+                    with col2:
+                        st.button(
+                            " (**" + str(session_aux[items]) + "**)",
+                            type="secondary",
+                            key=key + 1,
+                        )
+                    with col3:
+                        button_clicked_rem = st.button(
+                            label="**-**",
+                            type="secondary",
+                            key=key + 2,
+                        )
                         if button_clicked_rem == True:
                             remove_from_cart_list.append(items)
-                key = key + 2
+                    with col4:
+                        button_clicked_add = st.button(
+                            label="**+**",
+                            type="secondary",
+                            key=key + 3,
+                        )
+                        if button_clicked_add == True:
+                            add_to_cart_list.append(items)
+                key = key + 4
     add_remove_cart_items(
         add_to_cart_list=add_to_cart_list,
         remove_from_cart_list=remove_from_cart_list,
@@ -238,7 +247,7 @@ hide_menu_style = """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 ####### TABS
-tab1, tab2 = st.tabs(["Sugeridor", "Menu Completo"])
+tab1, tab2, tab3 = st.tabs(["Sugeridor", "Menu Completo", "Añadido a la lista"])
 
 ####### TAB1
 with tab1:
