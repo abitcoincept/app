@@ -9,6 +9,9 @@ propmpt_template1 = st.secrets["prompt_template1"]
 propmpt_template2 = st.secrets["prompt_template2"]
 fake_answer = st.secrets["fake_answer"]
 # food_images = st.secrets["food_images"]
+
+use_fake_prompt = False
+
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
@@ -16,6 +19,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.utilities import WikipediaAPIWrapper
 from langchain.callbacks import get_openai_callback
 
+##### Dictionaries
 food_images = {
     "tacos de ternera clásicos": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
     "tacos de pollo a la parrilla": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
@@ -39,20 +43,36 @@ food_prices = {
     "alitas de pollo": "5,49€",
     "aros de cebolla rebozados con cerveza": "3,49€",
     "fried avocado bites": "2,49€",
+    "chimay blue": "6€",
+    "weihenstephaner hefeweissbier": "7€",
+    "hitachino nest white ale": "5€",
+    "la chouffe": "6€",
+    "rodenbach grand cru": "11€",
+    "augustiner helles": "7€",
+    "founders breakfast stout": "4€",
+    "westvleteren 12": "6€",
 }
-##### REMEMBER TO SAVEEE! #####
+add_to_cart_list = []
+remove_from_cart_list = []
 ##### Custom Functions
-
-
+# @st.cache_data(experimental_allow_widgets=True)
 def image_parser(answer, food_images):
     recomendations = re.findall(r"\[.*?\]", answer)
+
+    i = 0
+    recomendations_aux = []
+    for dish in recomendations:
+        dish_aux_2 = dish.replace("[", "")
+        dish_aux_2 = dish_aux_2.replace("]", "")
+        dish_aux_2 = dish_aux_2.lower()
+        recomendations_aux.append(dish_aux_2)
 
     for dish in recomendations:
         dish_aux = dish.replace("[", "")
         dish_aux = dish_aux.replace("]", "")
         dish_aux = dish_aux.lower()
         split_answer = answer.split(sep=dish, maxsplit=1)
-        print(split_answer)
+
         split_answer_aux = split_answer[0]
         if split_answer_aux[0:2] == ". ":
             split_answer_aux = split_answer_aux.replace(". ", "", 1)
@@ -62,25 +82,145 @@ def image_parser(answer, food_images):
             split_answer_aux.strip().capitalize() + " **" + dish_aux.title() + "**",
             unsafe_allow_html=True,
         )
+
         container = st.container()
         with container:
-            col1, col2, col3, col4 = st.columns(4)
-            with col2:
-                st.components.v1.iframe(
-                    src=food_images[dish_aux],
-                    width=150,
-                    height=150,
-                )
-            with col3:
-                st.subheader(food_prices[dish_aux])
-        print(dish_aux)
-        print(food_images[dish_aux])
+            button_clicked = False
+            if dish_aux in food_images:
+                col1, col2, col3, col4 = st.columns(4)
+                with col2:
+                    st.components.v1.iframe(
+                        src=food_images[dish_aux],
+                        width=150,
+                        height=150,
+                    )
+                with col3:
+                    button_clicked = st.button(
+                        ":white[Añadir a la lista: \n **"
+                        + dish_aux.title()
+                        + "** ("
+                        + food_prices[dish_aux]
+                        + ")]",
+                        type="secondary",
+                    )
+                    if button_clicked == True:
+                        add_to_cart_list.append(dish_aux)
+            else:
+                col1, col2, col3 = st.columns(3)
+                with col2:
+                    button_clicked = st.button(
+                        ":white[Añadir a la lista: \n **"
+                        + dish_aux.title()
+                        + "** ("
+                        + food_prices[dish_aux]
+                        + ")]",
+                        type="secondary",
+                    )
+                    if button_clicked == True:
+                        add_to_cart_list.append(dish_aux)
         answer = split_answer[1]
+
+        i = i + 1
+
+    add_remove_cart_items(
+        add_to_cart_list=add_to_cart_list,
+        remove_from_cart_list=remove_from_cart_list,
+    )
     split_answer = answer.split(sep=recomendations[-1], maxsplit=1)
     split_answer_aux = split_answer[-1]
     if split_answer_aux[0:2] == ". ":
         split_answer_aux = split_answer_aux.replace(". ", "", 1)
     st.markdown(split_answer_aux.strip().capitalize(), unsafe_allow_html=True)
+
+
+def add_remove_cart_items(
+    add_to_cart_list,
+    remove_from_cart_list,
+):
+    for item in add_to_cart_list:
+        if item in food_prices:
+            if item not in st.session_state:
+                st.session_state[item] = 0
+            st.session_state[item] = st.session_state[item] + 1
+
+    for item in remove_from_cart_list:
+        if item in food_prices:
+            if item not in st.session_state:
+                st.session_state[item] = 0
+            if st.session_state[item] > 0:
+                st.session_state[item] = st.session_state[item] - 1
+    if not add_to_cart_list == []:
+        st.experimental_rerun()
+    if not remove_from_cart_list == []:
+        st.experimental_rerun()
+
+
+def format_answer(title):
+    answer = title.replace(";", ".")
+    # answer = answer.replace("[", "**")
+    # answer = answer.replace("]", "**")
+    if answer[0:2] == ", ":
+        answer = answer.replace(", ", "", 1)
+
+    answer = answer.capitalize()
+    phrases = answer.split(sep=".")
+
+    answer = ""
+    for phrase in phrases:
+        answer = answer + ". " + phrase.strip().capitalize()
+    answer = answer.replace(". ", "", 1)
+    answer = answer.replace(". ", ". <br>")
+    return answer
+
+
+def update_sidebar():
+    add_to_cart_list = []
+    remove_from_cart_list = []
+    with st.sidebar:
+        key = 0
+        session_aux = st.session_state
+        for items in session_aux:
+            if items in food_prices:
+                button_clicked_add = False
+                button_clicked_rem = False
+                if session_aux[items] > 0:
+                    col1, col2 = st.columns([1, 5])
+                    with col2:
+                        button_clicked_add = st.button(
+                            label=items.title()
+                            + " (**"
+                            + str(session_aux[items])
+                            + "**)",
+                            type="secondary",
+                            key=key + 1,
+                        )
+                        if button_clicked_add == True:
+                            add_to_cart_list.append(items)
+                    with col1:
+                        button_clicked_rem = st.button(
+                            label="**-**",
+                            type="secondary",
+                            key=key,
+                        )
+                        if button_clicked_rem == True:
+                            remove_from_cart_list.append(items)
+                key = key + 2
+    add_remove_cart_items(
+        add_to_cart_list=add_to_cart_list,
+        remove_from_cart_list=remove_from_cart_list,
+    )
+
+
+@st.cache_data
+def run_llm(prompt, use_fake_prompt, fake_answer):
+    if use_fake_prompt == True:
+        title = fake_answer
+    else:
+        with get_openai_callback() as cb:
+            title = title_chain.run(prompt)
+            # title = script_chain.run(title=title)
+            print(cb)
+    return title
 
 
 os.environ[
@@ -96,9 +236,6 @@ hide_menu_style = """
         </style>
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
-# add_selectbox = st.sidebar.selectbox(
-#        "How would you like to be contacted?", ("Email", "Home phone", "Mobile phone")
-#    )
 
 ####### TABS
 tab1, tab2 = st.tabs(["Sugeridor", "Menu Completo"])
@@ -116,7 +253,7 @@ with tab1:
         prompt = st.text_input(
             "¿Qué te apetece hoy?",
             max_chars=80,
-            placeholder="Algo fresco",
+            placeholder="¿Qué te apetece hoy?",
             label_visibility="collapsed",
         )
     ###### Number of people
@@ -146,7 +283,7 @@ with tab1:
 
     search = st.button("**¡Pregunta a nuestro sugeridor!**", type="secondary")
     if prompt == "":
-        # st.divider()
+        ### Sugerencias preguntas
         st.write("Puedes preguntar cosas como: ")
         col1, col2 = st.columns(2)
         with col1:
@@ -208,63 +345,21 @@ with tab1:
     if prompt:
         prompt_is_filled = True
     if prompt_is_filled:
-        # title = fake_answer
-        print(prompt)
-        with get_openai_callback() as cb:
-            title = title_chain.run(prompt)
-            # title = script_chain.run(title=title)
-            print(cb)
+        title = run_llm(
+            prompt=prompt, use_fake_prompt=use_fake_prompt, fake_answer=fake_answer
+        )
 
-        ###### Progress bar
-
-        # progress_text = "Preguntando a Paco...😋"
-        # my_bar = st.progress(0, text=progress_text)
         st.divider()
-        # for percent_complete in range(100):
-        #    time.sleep(0.01)
-        #    progress_text = f"Preguntando a Paco... {percent_complete+1}% 😋"
-        #    my_bar.progress(percent_complete + 1, text=progress_text)
-
-        # wiki_research = wiki.run(prompt)
-        # script = script_chain.run(title=title, restaurant_menu=wiki_research)
-        # director = director_chain.run(title=title, director="Enrique")
 
         ###### Format Output
-        answer = title.replace(";", ".")
-        # answer = answer.replace("[", "**")
-        # answer = answer.replace("]", "**")
-        if answer[0:2] == ", ":
-            answer = answer.replace(", ", "", 1)
 
-        answer = answer.capitalize()
-        phrases = answer.split(sep=".")
-        print(phrases)
-        answer = ""
-        for phrase in phrases:
-            answer = answer + ". " + phrase.strip().capitalize()
-        answer = answer.replace(". ", "", 1)
-        answer = answer.replace(". ", ". <br>")
-        print(answer)
+        answer = format_answer(title=title)
         # st.markdown(answer, unsafe_allow_html=True)
         image_parser(answer=answer, food_images=food_images)
         ###### Create Expanders
         recomendations = re.findall(r"\[.*?\]", title)
-
-        with st.expander("Recomendaciones"):
-            st.write(recomendations)
-
-        # st.write(response["title"])
-        # st.write(script)
-        # st.write(director)
-        # with st.expander("Title History"):
-        #    st.info(title_memory.buffer)
-
-        # with st.expander("Script History"):
-        # st.info(script_memory.buffer)
-
-        # with st.expander("Wikipedia Research History"):
-        # st.info(wiki_research)
-
+        ###### Side Bar
+    update_sidebar()
 
 ###### TAB 2
 with tab2:
