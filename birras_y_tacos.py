@@ -8,6 +8,7 @@ apikey = st.secrets["OPENAI_API_KEY"]
 propmpt_template1 = st.secrets["prompt_template1"]
 propmpt_template2 = st.secrets["prompt_template2"]
 fake_answer = st.secrets["fake_answer"]
+# food_images = st.secrets["food_images"]
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
@@ -15,7 +16,72 @@ from langchain.memory import ConversationBufferMemory
 from langchain.utilities import WikipediaAPIWrapper
 from langchain.callbacks import get_openai_callback
 
+food_images = {
+    "tacos de ternera clásicos": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
+    "tacos de pollo a la parrilla": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
+    "baja fish tacos": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
+    "veggie tacos": "https://drive.google.com/uc?export=view&id=17RzYwLWvEIYy99AQ064guCIWx7XgjkrX",
+    "nachos cargados": "https://drive.google.com/uc?export=view&id=1OsX--f4iCrWcluxLmCWQ628HpJpwqBmI",
+    "quesadilla": "https://drive.google.com/uc?export=view&id=1CVK6ZiKQbEV1Ev4C5COe9QI90EcBD42t",
+    "hamburguesa a la brasa": "https://drive.google.com/uc?export=view&id=1SGA2ccyiuaiDwUoHtrq-EPTWJ1n6C6gv",
+    "alitas de pollo": "https://drive.google.com/uc?export=view&id=12SystKdDfoNBvu6PE7j88Uvy2cOWTjzd",
+    "aros de cebolla rebozados con cerveza": "https://drive.google.com/uc?export=view&id=1HIofkJJkBiik4Jvs86WhGEgRjEPBB_8q",
+    "fried avocado bites": "https://drive.google.com/uc?export=view&id=1D87paeSaif7pw9jtT5ZoRLnwdmbleyY_",
+}
+food_prices = {
+    "tacos de ternera clásicos": "7,99€",
+    "tacos de pollo a la parrilla": "6,99€",
+    "baja fish tacos": "9,99€",
+    "veggie tacos": "5,99€",
+    "nachos cargados": "10,99 €",
+    "quesadilla": "7,49€",
+    "hamburguesa a la brasa": "9,49€",
+    "alitas de pollo": "5,49€",
+    "aros de cebolla rebozados con cerveza": "3,49€",
+    "fried avocado bites": "2,49€",
+}
 ##### REMEMBER TO SAVEEE! #####
+##### Custom Functions
+
+
+def image_parser(answer, food_images):
+    recomendations = re.findall(r"\[.*?\]", answer)
+
+    for dish in recomendations:
+        dish_aux = dish.replace("[", "")
+        dish_aux = dish_aux.replace("]", "")
+        dish_aux = dish_aux.lower()
+        split_answer = answer.split(sep=dish, maxsplit=1)
+        print(split_answer)
+        split_answer_aux = split_answer[0]
+        if split_answer_aux[0:2] == ". ":
+            split_answer_aux = split_answer_aux.replace(". ", "", 1)
+        if split_answer_aux[0:2] == ", ":
+            split_answer_aux = split_answer_aux.replace(", ", "", 1)
+        st.markdown(
+            split_answer_aux.strip().capitalize() + " **" + dish_aux.title() + "**",
+            unsafe_allow_html=True,
+        )
+        container = st.container()
+        with container:
+            col1, col2, col3, col4 = st.columns(4)
+            with col2:
+                st.components.v1.iframe(
+                    src=food_images[dish_aux],
+                    width=150,
+                    height=150,
+                )
+            with col3:
+                st.subheader(food_prices[dish_aux])
+        print(dish_aux)
+        print(food_images[dish_aux])
+        answer = split_answer[1]
+    split_answer = answer.split(sep=recomendations[-1], maxsplit=1)
+    split_answer_aux = split_answer[-1]
+    if split_answer_aux[0:2] == ". ":
+        split_answer_aux = split_answer_aux.replace(". ", "", 1)
+    st.markdown(split_answer_aux.strip().capitalize(), unsafe_allow_html=True)
+
 
 os.environ[
     "OPENAI_API_KEY"
@@ -79,8 +145,8 @@ with tab1:
         propmpt_num_people = ". Para " + num_people + "personas"
 
     search = st.button("**¡Pregunta a nuestro sugeridor!**", type="secondary")
-    if prompt_is_filled == False & search == False:
-        st.divider()
+    if prompt == "":
+        # st.divider()
         st.write("Puedes preguntar cosas como: ")
         col1, col2 = st.columns(2)
         with col1:
@@ -151,13 +217,13 @@ with tab1:
 
         ###### Progress bar
 
-        progress_text = "Preguntando a Paco...😋"
-        my_bar = st.progress(0, text=progress_text)
+        # progress_text = "Preguntando a Paco...😋"
+        # my_bar = st.progress(0, text=progress_text)
         st.divider()
-        for percent_complete in range(100):
-            time.sleep(0.01)
-            progress_text = f"Preguntando a Paco... {percent_complete+1}% 😋"
-            my_bar.progress(percent_complete + 1, text=progress_text)
+        # for percent_complete in range(100):
+        #    time.sleep(0.01)
+        #    progress_text = f"Preguntando a Paco... {percent_complete+1}% 😋"
+        #    my_bar.progress(percent_complete + 1, text=progress_text)
 
         # wiki_research = wiki.run(prompt)
         # script = script_chain.run(title=title, restaurant_menu=wiki_research)
@@ -165,8 +231,8 @@ with tab1:
 
         ###### Format Output
         answer = title.replace(";", ".")
-        answer = answer.replace("[", "**")
-        answer = answer.replace("]", "**")
+        # answer = answer.replace("[", "**")
+        # answer = answer.replace("]", "**")
         if answer[0:2] == ", ":
             answer = answer.replace(", ", "", 1)
 
@@ -179,8 +245,8 @@ with tab1:
         answer = answer.replace(". ", "", 1)
         answer = answer.replace(". ", ". <br>")
         print(answer)
-        st.markdown(answer, unsafe_allow_html=True)
-
+        # st.markdown(answer, unsafe_allow_html=True)
+        image_parser(answer=answer, food_images=food_images)
         ###### Create Expanders
         recomendations = re.findall(r"\[.*?\]", title)
 
