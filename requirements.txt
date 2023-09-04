@@ -1,7 +1,8 @@
+os
 streamlit
-langchain
-openai
-wikipedia
-chromadb
-tiktoken
-streamlit-extras
+time
+streamlit_analytics
+yfinance
+cufflinks
+datetime
+random
