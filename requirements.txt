@@ -1,8 +1,4 @@
-os
-streamlit
-time
-streamlit_analytics
-yfinance
-cufflinks
-datetime
-random
+cufflinks==0.17.3
+streamlit==1.25.0
+streamlit_analytics==0.4.1
+yfinance==0.2.28
